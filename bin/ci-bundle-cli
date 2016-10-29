@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "bundler"
+
+# Add load path for require to find the code
+cur_dir     = File.dirname(File.absolute_path(__FILE__))
+include_dir = File.join(cur_dir, '../lib')
+$LOAD_PATH.insert(0, include_dir)
+
+#puts "====#{cur_dir}"
+ENV["BUNDLE_GEMFILE"] = File.join(cur_dir, '../Gemfile')
+Bundler.setup
+ENV["BUNDLE_GEMFILE"] = nil
+
+require 'ci_bundle/cli'
+require 'slop'
+
+opts = Slop.parse do |o|
+
+  #o.bool '-v', '--verbose', 'enable verbose mode'
+  #o.bool '-q', '--quiet', 'suppress output (quiet mode)'
+  cmd_runable = %w(bundle-update rails-migrate svn-udpate git-update)
+
+  o.string '-f','--file', 'Script to run'
+  o.string '--parser', 'Parser to use'
+  o.string '--path', 'Working directory (rspec)'
+  o.string '--notify', 'Who looks after the script, gets the errors and all reports'
+  o.string '--config', 'Points to the YAML settings file (TODO)'
+
+  o.array '-r', '--run', "Run canned commands in the order given (#{cmd_runable.join(', ')})"
+  
+  o.bool '--verbose', 'Verbose'
+
+  o.on '--version', 'print the version' do
+    puts Slop::VERSION
+    exit
+  end
+end
+
+#puts "ARGUMENTS: #{opts.arguments.inspect}"
+
+CiBundle::Cli.run(opts.arguments.first, opts)
