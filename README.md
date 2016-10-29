@@ -1,36 +1,14 @@
-# CiBundle::Cli
+# CiBunde (WIP)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ci_bundle/cli`. To experiment with that code, run `bin/console` for an interactive prompt.
+Doesn't isn't that creative, a placeholder I guess.
 
-TODO: Delete this and the text above, and describe your gem
+Based on a script I made awhile ago that ran RSpec tests and emailed the result. This is just a more structured version. I refacted because the script was starting to show growing pains (scaling).
 
-## Installation
+The basic process was:
 
-Add this line to your application's Gemfile:
+ - Run script wrapper which would fork another bash command that would then run RSpec etc.
+ - Take the results and email them to people
 
-```ruby
-gem 'ci_bundle-cli'
-```
+The Reason for the forking was the script ran it's own ruby version. If the tests need a newer version then we would have all sorts of problems. usually dependencies. Bundler was also involved.
 
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install ci_bundle-cli
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/ci_bundle-cli.
-
+I'll get around to editing more of this README file later. I tend to write documentation to have a break from coding.
