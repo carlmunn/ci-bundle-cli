@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Carl Munn"]
   spec.email         = ["carl.munn@open2view.com"]
 
-  spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = %q{Helps with running tests and sending out email about failures}
+  spec.description   = %q{Replacement for a simple script that did this but got out of hand so I decided to restructure}
+  spec.homepage      = "https://github.com/carlmunn/ci-bundle-cli"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
