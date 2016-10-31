@@ -1,10 +1,13 @@
 require 'byebug'
 require 'open3'
+require 'cgi'
 
 module CiBundle
   module Cli
     # Supply basic commands that will be used all
     class BaseCommand
+      
+      class CiFailureExp < StandardError; end
 
       CMDS_LOOKUP = {
         'bundle-update': 'bundle update',
@@ -29,9 +32,12 @@ module CiBundle
 
         _log "status:#{status}"
 
-        _process_error(err_str) if err_str
+        #raise(CiFailureExp, "Errors from Open3: #{err_str}") if status != 0 && _present?(err_str)
 
         out_str
+      rescue => err
+        _process_exception(err)
+        ""
       end
 
       def _log(msg)
@@ -39,8 +45,7 @@ module CiBundle
       end
 
       def pre_run_commands
-        check_option(:run)
-        @opts[:run].map {|cmd| CMDS_LOOKUP[cmd] }.compact
+        @opts[:run].map {|cmd| CMDS_LOOKUP[cmd] }.compact if @opts[:run]
       end
 
       # The result might be XML or JSON. tidy it so we can send it in an email
@@ -71,13 +76,30 @@ module CiBundle
         raise "Option '#{name}' was not supplied" unless @opts[name]
       end
 
-      def _process_error(err)
-        warn(err)
+      def _process_exception(exp)
+        warn("[W] '#{exp}'")
 
-        _data = {subject: 'Test Error for XXX', body: err}
+        _body = "exp: #{e(exp.to_s)}<br><br>#{exp.backtrace.join("<br>")}"
+
+        _data = {subject: email_subject('Tests raised an exception'), body: _body}
         _opts = {notify: @opts[:notify]}
 
         CiBundle::Cli::Mailer.new(_data, opts: _opts).deliver!
+      end
+
+      def e(str)
+        CGI::escapeHTML(str)
+      end
+
+      def email_subject(subject)
+        [].tap do |ary|
+          ary << "[#{@opts[:namespace]}]" if @opts[:namespace]
+          ary << subject
+        end.join(" ")
+      end
+
+      def _present?(str)
+        str && str.length >= 1
       end
     end
   end

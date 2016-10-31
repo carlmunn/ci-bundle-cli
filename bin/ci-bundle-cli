@@ -22,11 +22,12 @@ opts = Slop.parse do |o|
   #o.bool '-q', '--quiet', 'suppress output (quiet mode)'
   cmd_runable = %w(bundle-update rails-migrate svn-udpate git-update)
 
-  o.string '-f','--file', 'Script to run'
+  o.array '-f','--file', 'Script to run'
   o.string '--parser', 'Parser to use'
   o.string '--path', 'Working directory (rspec)'
   o.string '--notify', 'Who looks after the script, gets the errors and all reports'
   o.string '--config', 'Points to the YAML settings file (TODO)'
+  o.string '-N', '--namespace', "Namespace to help distinguish the different tests"
 
   o.array '-r', '--run', "Run canned commands in the order given (#{cmd_runable.join(', ')})"
   

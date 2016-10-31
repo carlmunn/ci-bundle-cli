@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>{{title}}</title>
+  <title>RSpec Results</title>
 </head>
 <body>
-  <h1>{{title}} Tests</h1>
-  <p>{{body}}</p>
+  <h1>Failures</h1>
+
+  {{# failures }}
+  <div style='margin-top:10px;'>
+    {{ desc }} <span style='color:gray;margin-left:30px;'>{{file}}</span><br>
+
+    <div style='font-size: 10px;color:gray'>
+      <div style='color: red; font-size: 12px;'>{{exception.message}}</div>
+      {{# backtrace}}
+        {{to_s}} <br>
+      {{/ backtrace}}
+    </div>
+  </div>
+  {{/ failures }}
 </body>
 </html>

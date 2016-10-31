@@ -4,21 +4,60 @@ require 'mustache'
 module CiBundle
   module Cli
 
-    class Renderor < Mustache
+    ExampleObj = Struct.new(:desc, :file, :exception, :backtrace)
+
+    class RspecRenderor < Mustache
+
+      LIMIT_BT       = 15
+      IGNORE_GEM_DIR = true
 
       self.template_file = File.join(File.dirname(__FILE__), '../../../templates/email-basic.html.mustache')
 
       attr_accessor :title, :body
 
-      def initialize(data)
-        @title = data[:title]
-        @body  = data[:body]
+      # Root keys: [:to, :from, :subject, :body_hash]
+      def initialize(hash_data, opts: {})
+        @hsh   = hash_data
+        @opts  = opts
+
+        @title = @hsh[:title]
+        @body  = @hsh[:body_hash]
+      end
+
+      def summary
+        rspec_hash["summary"]
+      end
+
+      def example_size
+        examples.size
+      end
+
+      def examples
+        rspec_hash["examples"]
+      end
+
+      def rspec_hash
+        @hsh[:body_hash]
+      end
+
+      def failures
+        examples.select { |example| example["status"] == "failed" }.map do |hsh|
+          _file = "#{hsh["file_path"]}:#{hsh["line_number"]}"
+          ExampleObj.new(hsh["full_description"], _file, hsh["exception"], filter_backtrace(hsh["exception"]))
+        end
+      end
+
+      private
+      def filter_backtrace(exp)
+        exp["backtrace"].reject do |str|
+          str.match(/\/gems\//) || str.match(/\/\.gem\//) if IGNORE_GEM_DIR
+        end[0...LIMIT_BT]
       end
     end
 
     class Mailer
       def initialize(details, opts: {})
-        @opts =  opts
+        @opts    = opts
         @notify  = @opts[:notify]
         @emails  = @opts[:emails] || @notify
         @details = details
@@ -32,7 +71,7 @@ module CiBundle
         _details = @details
         _notify  = @notify
         _emails  = @emails
-        _body    = render(_details[:body])
+        _body    = render(@details)
 
         Mail.new do
           from         _notify
@@ -44,18 +83,13 @@ module CiBundle
       end
 
       private
-      def render(data)
-        if data.is_a?(Hash)
-          renderor = Renderor.new(title: 'title', body: 'body')
+      def render(hash_or_str)
+        if hash_or_str[:body_hash].is_a?(Hash)
+          renderor = RspecRenderor.new(hash_or_str, opts: @opts)
           renderor.render
         else
-          data
+          hash_or_str[:body] || '--'
         end
-      end
-
-      def tempalte_file
-        File.join('email-basic-html.mustache')
-        File.dirname
       end
 
       def valid_details?(details)

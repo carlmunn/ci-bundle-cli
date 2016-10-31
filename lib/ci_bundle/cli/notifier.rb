@@ -4,27 +4,26 @@ module CiBundle
 
       # Currently only email or stdout
       def initialize(opts={})
-        @opts   = opts
-
+        @opts = opts
       end
 
-      def process(data, by: nil)
+      def process(body_hash, by: nil)
         case by
         when :email
-          _email(data)
+          _email(body_hash)
         else
-          _output(data)
+          _output(body_hash)
         end
       end
 
       private
-      def _output(msg)
-        puts ['[Notifier:Start]', msg, '[Notifier:End]'].join("\n")
+      def _output(body_hash)
+        puts ['[Notifier:Start]', body_hash.inspect, '[Notifier:End]'].join("\n")
       end
 
       # --email option will contain who to email to
-      def _email(details)
-        mailer = CiBundle::Cli::Mailer.new(details, opts: @opts)
+      def _email(body_hash)
+        mailer = CiBundle::Cli::Mailer.new(body_hash, opts: @opts)
         mailer.deliver!
       end
     end
