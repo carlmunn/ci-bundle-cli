@@ -36,8 +36,7 @@ module CiBundle
 
         out_str
       rescue => err
-        _process_exception(err)
-        ""
+        _process_exception(err); ""
       end
 
       def _log(msg)
@@ -54,7 +53,7 @@ module CiBundle
       end
 
       def notify(result, by: nil)
-        @notifier.process(result, by: by)
+        @notifier.notify_success(result, by: by)
       end
 
       def _basename
@@ -78,24 +77,7 @@ module CiBundle
 
       def _process_exception(exp)
         warn("[W] '#{exp}'")
-
-        _body = "exp: #{e(exp.to_s)}<br><br>#{exp.backtrace.join("<br>")}"
-
-        _data = {subject: email_subject('Tests raised an exception'), body: _body}
-        _opts = {notify: @opts[:notify]}
-
-        CiBundle::Cli::Mailer.new(_data, opts: _opts).deliver!
-      end
-
-      def e(str)
-        CGI::escapeHTML(str)
-      end
-
-      def email_subject(subject)
-        [].tap do |ary|
-          ary << "[#{@opts[:namespace]}]" if @opts[:namespace]
-          ary << subject
-        end.join(" ")
+        @notifier.notify_exception(exp)
       end
 
       def _present?(str)

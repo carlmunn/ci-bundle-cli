@@ -6,7 +6,7 @@ module CiBundle
 
     ExampleObj = Struct.new(:desc, :file, :exception, :backtrace)
 
-    class RspecRenderor < Mustache
+    class RspecMailRenderor < Mustache
 
       LIMIT_BT       = 15
       IGNORE_GEM_DIR = true
@@ -58,8 +58,8 @@ module CiBundle
     class Mailer
       def initialize(details, opts: {})
         @opts    = opts
-        @notify  = @opts[:notify]
-        @emails  = @opts[:emails] || @notify
+        @notify  = @opts[:email].first
+        @emails  = @opts[:email]
         @details = details
       end
 
@@ -85,7 +85,7 @@ module CiBundle
       private
       def render(hash_or_str)
         if hash_or_str[:body_hash].is_a?(Hash)
-          renderor = RspecRenderor.new(hash_or_str, opts: @opts)
+          renderor = RspecMailRenderor.new(hash_or_str, opts: @opts)
           renderor.render
         else
           hash_or_str[:body] || '--'

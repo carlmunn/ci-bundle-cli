@@ -23,6 +23,6 @@ describe CiBundle::Cli do
 
   it "tests basic rspec command" do
     expect(@mail).to receive(:deliver!)
-    CiBundle::Cli.run('rspec', {path: './path/to/rspec', verbose: true, notify: 'me@test.com'})
+    CiBundle::Cli.run('rspec', {path: './path/to/rspec', verbose: true, email: 'me@test.com'})
   end
 end

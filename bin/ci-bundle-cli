@@ -25,9 +25,9 @@ opts = Slop.parse do |o|
   o.array '-f','--file', 'Script to run'
   o.string '--parser', 'Parser to use'
   o.string '--path', 'Working directory (rspec)'
-  o.string '--notify', 'Who looks after the script, gets the errors and all reports'
   o.string '--config', 'Points to the YAML settings file (TODO)'
-  o.string '-N', '--namespace', "Namespace to help distinguish the different tests"
+  o.string '--namespace', "Namespace to help distinguish the different tests"
+  o.array '--email', 'Email to send the failed results to (first gets the exceptions)'
 
   o.array '-r', '--run', "Run canned commands in the order given (#{cmd_runable.join(', ')})"
   
@@ -39,6 +39,8 @@ opts = Slop.parse do |o|
   end
 end
 
+#puts opts[:email].first
+#puts opts.used_options.map {|o| "#{o.key}: #{o.value}" }.join("\n")
 #puts "ARGUMENTS: #{opts.arguments.inspect}"
 
 CiBundle::Cli.run(opts.arguments.first, opts)
