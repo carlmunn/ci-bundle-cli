@@ -11,7 +11,7 @@ module CiBundle
 
       CMDS_LOOKUP = {
         'bundle-update': 'bundle update',
-        'rails-update': 'rake db:migrate',
+        'rails-migrate': 'rake db:migrate',
         'svn-update': 'svn update',
         'git-update': 'git pull'
       }
@@ -45,7 +45,7 @@ module CiBundle
       end
 
       def pre_run_commands
-        @opts[:run].map {|cmd| CMDS_LOOKUP[cmd] }.compact if @opts[:run]
+        @opts[:run].map {|cmd| CMDS_LOOKUP[cmd.to_sym] }.compact if @opts[:run]
       end
 
       # The result might be XML or JSON. tidy it so we can send it in an email
