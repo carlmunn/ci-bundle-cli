@@ -1,5 +1,3 @@
-require 'json'
-
 module CiBundle
   module Cli
     class Parser

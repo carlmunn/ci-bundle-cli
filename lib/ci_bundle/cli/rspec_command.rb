@@ -5,16 +5,18 @@ module CiBundle::Cli
       files = @opts[:file].join(' ')
 
       cmds = [].tap do |ary|
-        ary.concat(["cd #{_path}"])
-        ary.concat(pre_run_commands)
+        ary.concat(["cd #{_path}"]) if _path
+        ary.concat([*pre_run_commands])
         ary.concat(["bundle exec rspec #{files} --format j"])
       end
 
-      _log("CMDS:\n#{cmds.join("\n")}")
+      _log("COMMANDS: #{cmds.join(", ")}")
 
       # Get the last line, JSON is place on one night
       # and we can avoid all the other stdout.
       result = run_command(cmds.join(';'))
+
+      _log("RESULT: #{result}")
 
       # Get the last line
       result = result.split("\n").last
@@ -62,6 +64,10 @@ module CiBundle::Cli
 
     def has_failure?(result)
       result['examples'].any? {|example| example['status'] == 'failed' }
+    end
+
+    def _log(msg)
+      CiBundle::Cli.log(msg)
     end
   end
 end

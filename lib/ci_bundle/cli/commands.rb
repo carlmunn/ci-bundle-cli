@@ -1,7 +1,3 @@
-require 'byebug'
-require 'open3'
-require 'cgi'
-
 module CiBundle
   module Cli
     # Supply basic commands that will be used all
@@ -26,21 +22,26 @@ module CiBundle
 
       private
       def run_command(cmd)
-        _log "Command: #{cmd}"[0..256]
+        
+        _log "RUBY: #{`ruby -v`.chomp}"
 
-        out_str, err_str, status = Open3.capture3(cmd)
+        begin
+          _log "CMD: #{cmd}"
 
-        _log "status:#{status}"
+          out_str, err_str, status = Open3.capture3(cmd)
 
-        #raise(CiFailureExp, "Errors from Open3: #{err_str}") if status != 0 && _present?(err_str)
+          _log "CMD status: #{status}"
 
-        out_str
-      rescue => err
-        _process_exception(err); ""
+          #raise(CiFailureExp, "Errors from Open3: #{err_str}") if status != 0 && _present?(err_str)
+
+          out_str
+        rescue => err
+          _process_exception(err); ""
+        end
       end
 
       def _log(msg)
-        puts "[D] #{msg}" if @opts[:verbose]
+        CiBundle::Cli.log(msg)
       end
 
       def pre_run_commands
@@ -56,19 +57,18 @@ module CiBundle
         @notifier.notify_success(result, by: by)
       end
 
-      def _basename
-        check_option(:file)
-        File.basename(@opts[:file])
-      end
+      #def _basename
+      #  check_option(:file)
+      #  File.basename(@opts[:file])
+      #end
 
-      def _pwd
-        check_option(:file)
-        File.absolute_path(File.dirname(@opts[:file]))
-      end
+      #def _pwd
+      #  check_option(:file)
+      #  File.absolute_path(File.dirname(@opts[:file]))
+      #end
 
       def _path
-        check_option(:path)
-        File.absolute_path(@opts[:path])
+        File.absolute_path(@opts[:path]) if @opts[:path]
       end
 
       def check_option(name)

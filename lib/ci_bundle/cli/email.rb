@@ -1,6 +1,3 @@
-require 'mail'
-require 'mustache'
-
 module CiBundle
   module Cli
 
@@ -58,7 +55,6 @@ module CiBundle
     class Mailer
       def initialize(details, opts: {})
         @opts    = opts
-        @notify  = @opts[:email].first
         @emails  = @opts[:email]
         @details = details
       end
@@ -68,18 +64,23 @@ module CiBundle
         valid_details?(@details)
         valid_email?(@emails)
 
-        _details = @details
-        _notify  = @notify
         _emails  = @emails
+        _details = @details
         _body    = render(@details)
 
-        Mail.new do
-          from         _notify
+        _log("MAIL to: #{@emails.inspect}")
+
+        mail = Mail.new do
+          from         _emails.first
           to           _details[:to] || _emails
           subject      _details[:subject]
           content_type 'text/html; charset=UTF-8'
           body         _body
-        end.deliver!
+        end
+
+        mail.deliver!
+
+        _log("MAIL deliver!: #{mail.inspect}")
       end
 
       private
@@ -102,6 +103,10 @@ module CiBundle
         if @emails.nil?
           raise 'No emails supplied'
         end
+      end
+
+      def _log(msg)
+        CiBundle::Cli.log(msg)
       end
     end
   end

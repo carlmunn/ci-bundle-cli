@@ -1,3 +1,9 @@
+require 'open3'
+require 'cgi'
+require 'mail'
+require 'mustache'
+require 'json'
+
 require "ci_bundle/cli/version"
 require "ci_bundle/cli/commands"
 require "ci_bundle/cli/notifier"
@@ -9,6 +15,7 @@ require "ci_bundle/cli/rspec_command"
 module CiBundle
   module Cli
     def self.run(command, opts={})
+      @opts = opts
       const_get("#{command.capitalize}Command").new(opts).run
     end
 
