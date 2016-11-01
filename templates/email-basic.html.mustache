@@ -2,20 +2,47 @@
 <html>
 <head>
   <title>RSpec Results</title>
+  <style type="text/css">
+    body {font-family: sans-serif; background-color: #e4e4e4;}
+    .test-block {margin-top:10px; border:1px solid #e0e0e0; padding: 10px; background-color:white;}
+    .file { font-weight: bold; margin-bottom: 5px; }
+    .test-name {}
+    .line-number {font-weight: bold;margin-right: 5px;}
+    .failure-reason {
+      padding: 5px;
+      margin: 5px 0px;
+      background-color: #f78080;
+    }
+    .backtrace {
+      color: gray;
+      font-size: 10px;
+      width: 960px;
+      white-space: nowrap;
+      text-align: left;
+      direction: rtl;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .indent {margin-left: 20px; margin-top: 15px;}
+  </style>
 </head>
 <body>
   <h1>Failures</h1>
 
   {{# failures }}
-  <div style='margin-top:10px;'>
-    {{ desc }} <span style='color:gray;margin-left:30px;'>{{file}}</span><br>
+  <div class='test-block'>
+    <div class='file'>{{file}}</div>
 
-    <div style='font-size: 10px;color:gray'>
-      <div style='color: red; font-size: 12px;'>{{exception.message}}</div>
-      {{# backtrace}}
-        {{to_s}} <br>
-      {{/ backtrace}}
+    {{# examples }}
+    <div class='indent'>
+      <div class='test-name'><span class='line-number'>Line:{{line}}</span> {{ desc }}</div>
+      <div class='failure-reason'>{{exception.message}}</div>
+      <div class='backtrace'>
+      {{# backtrace}} {{to_s}} <br>{{/ backtrace}}
+      </div>
     </div>
+    {{/ examples }}
+
   </div>
   {{/ failures }}
 </body>

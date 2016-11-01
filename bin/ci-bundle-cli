@@ -26,7 +26,7 @@ opts = Slop.parse do |o|
   o.string '--parser', 'Parser to use'
   o.string '--path', 'Working directory (rspec)'
   o.string '--config', 'Points to the YAML settings file (TODO)'
-  o.string '--namespace', "Namespace to help distinguish the different tests"
+  o.string '-N', '--namespace', "Namespace to help distinguish the different tests"
   o.array '--email', 'Email to send the failed results to (first gets the exceptions)'
 
   o.array '-r', '--run', "Run canned commands in the order given (#{cmd_runable.join(', ')})"

@@ -1,7 +1,10 @@
+require 'byebug'
+
 module CiBundle
   module Cli
 
-    ExampleObj = Struct.new(:desc, :file, :exception, :backtrace)
+    GroupObj   = Struct.new(:file, :examples)
+    ExampleObj = Struct.new(:line, :desc, :exception, :backtrace)
 
     class RspecMailRenderor < Mustache
 
@@ -38,9 +41,19 @@ module CiBundle
       end
 
       def failures
-        examples.select { |example| example["status"] == "failed" }.map do |hsh|
-          _file = "#{hsh["file_path"]}:#{hsh["line_number"]}"
-          ExampleObj.new(hsh["full_description"], _file, hsh["exception"], filter_backtrace(hsh["exception"]))
+        _failures = examples.select { |example| example["status"] == "failed" }.group_by {|ex| ex["file_path"] }
+
+        _failures.map do |file, examples|
+          _examples = examples.map { |hsh|
+            ExampleObj.new(
+              hsh["line_number"],
+              hsh["full_description"],
+              hsh["exception"],
+              filter_backtrace(hsh["exception"])
+            )
+          }
+
+          GroupObj.new(file, _examples)
         end
       end
 

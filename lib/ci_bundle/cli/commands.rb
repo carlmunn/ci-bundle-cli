@@ -57,15 +57,13 @@ module CiBundle
         @notifier.notify_success(result, by: by)
       end
 
-      #def _basename
-      #  check_option(:file)
-      #  File.basename(@opts[:file])
-      #end
+      def _basename
+        File.basename(@opts[:file]) if @opts[:file]
+      end
 
-      #def _pwd
-      #  check_option(:file)
-      #  File.absolute_path(File.dirname(@opts[:file]))
-      #end
+      def _pwd
+        File.absolute_path(File.dirname(@opts[:file])) if @opts[:file]
+      end
 
       def _path
         File.absolute_path(@opts[:path]) if @opts[:path]
