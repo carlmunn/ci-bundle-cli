@@ -58,11 +58,11 @@ module CiBundle
       end
 
       def _basename
-        File.basename(@opts[:file]) if @opts[:file]
+        File.basename(@opts[:file].first) if @opts[:file].first
       end
 
       def _pwd
-        File.absolute_path(File.dirname(@opts[:file])) if @opts[:file]
+        File.absolute_path(File.dirname(@opts[:file].first)) if @opts[:file].first
       end
 
       def _path

@@ -24,6 +24,10 @@ module CiBundle
         @body  = @hsh[:body_hash]
       end
 
+      def details
+        "RUBY_VERSION: #{RUBY_VERSION}, rspec version: #{@hsh[:body_hash]["version"]}, server: #{`whoami`.chomp}@#{`hostname`.chomp}"
+      end
+
       def summary
         rspec_hash["summary"]
       end
