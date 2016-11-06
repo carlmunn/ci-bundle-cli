@@ -7,13 +7,13 @@ module CiBundle
 
       CMDS_LOOKUP = {
         'bundle-update': 'bundle update',
-        'rails-migrate': 'bundle exec rake db:migrate',
+        'rails-migrate': 'RAILS_ENV=test bundle exec rake db:migrate',
         'svn-update': 'svn update',
         'git-update': 'git pull'
       }
 
       def initialize(opts={})
-        @opts    = opts
+        @opts     = opts
 
         # TODO: These could be extracted out into their own gems
         @notifier = CiBundle::Cli::Notifier.new(opts)
@@ -45,7 +45,29 @@ module CiBundle
       end
 
       def pre_run_commands
-        @opts[:run].map {|cmd| CMDS_LOOKUP[cmd.to_sym] }.compact if @opts[:run]
+        @opts[:run].map do |cmd|
+          _cmd = CMDS_LOOKUP[cmd.to_sym]
+
+          if @opts[:log]
+            "#{_cmd} > #{log_file(cmd)}"
+          else
+            _cmd
+          end
+        end.compact if @opts[:run]
+      end
+
+      def log_file(cmd_name)
+
+        ns   = @opts[:namespace]
+        date = Time.now.strftime("%Y-%m-%d_%H%M%S")
+
+        file_name = ['tests'].tap do |ary|
+          ary << ns.gsub(/\[\]/, '-').downcase if ns
+          ary << date
+          ary << cmd_name.gsub(/\s/, '_').downcase
+        end.join("_")
+        
+        "#{file_name}.log"
       end
 
       # The result might be XML or JSON. tidy it so we can send it in an email

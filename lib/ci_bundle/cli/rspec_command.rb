@@ -16,7 +16,7 @@ module CiBundle::Cli
       # and we can avoid all the other stdout.
       result = run_command(cmds.join(';'))
 
-      _log("RESULT: #{result}")
+      _log("RESULT: #{result.split("\n")[0..-2]}")
 
       # Get the last line
       result = result.split("\n").last

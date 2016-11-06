@@ -8,7 +8,6 @@ cur_dir     = File.dirname(File.absolute_path(__FILE__))
 include_dir = File.join(cur_dir, '../lib')
 $LOAD_PATH.insert(0, include_dir)
 
-#puts "====#{cur_dir}"
 ENV["BUNDLE_GEMFILE"] = File.join(cur_dir, '../Gemfile')
 Bundler.setup
 ENV["BUNDLE_GEMFILE"] = nil
@@ -18,8 +17,6 @@ require 'slop'
 
 opts = Slop.parse do |o|
 
-  #o.bool '-v', '--verbose', 'enable verbose mode'
-  #o.bool '-q', '--quiet', 'suppress output (quiet mode)'
   cmd_runable = %w(bundle-update rails-migrate svn-udpate git-update)
 
   o.array '-f','--file', 'Script to run'
@@ -27,10 +24,11 @@ opts = Slop.parse do |o|
   o.string '--path', 'Working directory (rspec)'
   o.string '--config', 'Points to the YAML settings file (TODO)'
   o.string '-N', '--namespace', "Namespace to help distinguish the different tests"
-  o.array '--email', 'Email to send the failed results to (first gets the exceptions)'
-
-  o.array '-r', '--run', "Run canned commands in the order given (#{cmd_runable.join(', ')})"
   
+  o.array '--email', 'Email to send the failed results to (first gets the exceptions)'
+  o.array '--run', "Run canned commands in the order given (#{cmd_runable.join(', ')})"
+  
+  o.bool '--log', 'Enable logging'
   o.bool '--verbose', 'Verbose'
 
   o.on '--version', 'print the version' do
@@ -38,9 +36,5 @@ opts = Slop.parse do |o|
     exit
   end
 end
-
-#puts opts[:email].first
-#puts opts.used_options.map {|o| "#{o.key}: #{o.value}" }.join("\n")
-#puts "ARGUMENTS: #{opts.arguments.inspect}"
 
 CiBundle::Cli.run(opts.arguments.first, opts)
