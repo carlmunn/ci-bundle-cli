@@ -3,12 +3,30 @@
 <head>
   <title>RSpec Results</title>
   <style type="text/css">
-    body {font-family: sans-serif; background-color: #e4e4e4;}
-    .details {color: gray;font-size: 12px;}
-    .test-block {margin-top:10px; border:1px solid #e0e0e0; padding: 10px; background-color:white;}
-    .file { font-weight: bold; margin-bottom: 5px; }
-    .test-name {}
-    .line-number {font-weight: bold;margin-right: 5px;}
+    body {
+      font-family: sans-serif;
+      background-color: #e4e4e4;
+    }
+    .details { 
+      color: gray;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .files .file { font-weight: bold; }
+    .test-block {
+      margin-top:10px;
+      border:1px solid #e0e0e0;
+      padding: 10px;
+      background-color:white;
+    }
+    .test-block .file {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .line-number {
+      font-weight: bold;
+      margin-right: 5px;
+    }
     .failure-reason {
       padding: 5px;
       margin: 5px 0px;
@@ -24,13 +42,22 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .indent {margin-left: 20px; margin-top: 15px;}
+    .indent {
+      margin-left: 20px;
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
   <h1>Failures</h1>
 
   <div class='details'>{{ details }}</div>
+
+  <div class='files'>
+    {{# files }}
+    <div class='file'>{{to_s}}</div>
+    {{/ files }}
+  </div>
 
   {{# failures }}
   <div class='test-block'>

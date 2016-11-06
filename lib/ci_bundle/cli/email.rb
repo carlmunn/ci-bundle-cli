@@ -44,9 +44,11 @@ module CiBundle
         @hsh[:body_hash]
       end
 
-      def failures
-        _failures = examples.select { |example| example["status"] == "failed" }.group_by {|ex| ex["file_path"] }
+      def files
+        _failures.keys
+      end
 
+      def failures
         _failures.map do |file, examples|
           _examples = examples.map { |hsh|
             ExampleObj.new(
@@ -62,6 +64,10 @@ module CiBundle
       end
 
       private
+      def _failures
+        examples.select { |example| example["status"] == "failed" }.group_by {|ex| ex["file_path"] }
+      end
+      
       def filter_backtrace(exp)
         exp["backtrace"].reject do |str|
           str.match(/\/gems\//) || str.match(/\/\.gem\//) if IGNORE_GEM_DIR
