@@ -16,6 +16,9 @@ module CiBundle::Cli
       # and we can avoid all the other stdout.
       result = run_command(cmds.join(';'))
 
+      # Write JSON to FS for analyse
+      #File.open("tmp-rspec-report-#{Time.now.to_i}", 'w') {|file| file.write(result) }
+
       _log("RESULT: #{result.split("\n")[0..-2]}")
 
       # Get the last line
@@ -42,7 +45,7 @@ module CiBundle::Cli
       {
         to:        _to_email,
         from:      _from_email,
-        subject:   email_subject("Test Results: #{body_hash['summary_line']}"),
+        subject:   email_subject("🔥 Test Results: #{body_hash['summary_line']}"),
         body_hash: body_hash
       }
     end
@@ -51,7 +54,7 @@ module CiBundle::Cli
       {
         to:        @opts[:email],
         from:      @opts[:email].first,
-        subject:   email_subject("All tests passed")
+        subject:   email_subject("✔ All tests passed")
       }
     end
 
