@@ -5,11 +5,14 @@ module CiBundle
       
       class CiFailureExp < StandardError; end
 
+      # FreeBSD
+      NULL_DEV = "/dev/null"
+
       CMDS_LOOKUP = {
-        'bundle-update': 'bundle update',
-        'rails-migrate': 'RAILS_ENV=test bundle exec rake db:migrate',
-        'svn-update': 'svn update',
-        'git-update': 'git pull'
+        'bundle-update': "bundle update",
+        'rails-migrate': "RAILS_ENV=test bundle exec rake db:migrate",
+        'svn-update': "svn update",
+        'git-update': "git pull"
       }
 
       def initialize(opts={})
@@ -32,6 +35,8 @@ module CiBundle
 
           _log "CMD status: #{status}"
 
+          _log "CMD error: #{err_str}" if err_str && err_str.length > 1
+
           #raise(CiFailureExp, "Errors from Open3: #{err_str}") if status != 0 && _present?(err_str)
 
           out_str
@@ -47,6 +52,8 @@ module CiBundle
       def pre_run_commands
         @opts[:run].map do |cmd|
           _cmd = CMDS_LOOKUP[cmd.to_sym]
+
+          _cmd = "#{_cmd} >#{NULL_DEV}" #@opts[:verbose]
 
           if @opts[:log]
             "#{_cmd} > #{log_file(cmd)}"

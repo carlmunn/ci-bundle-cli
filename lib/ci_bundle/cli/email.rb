@@ -25,7 +25,7 @@ module CiBundle
       end
 
       def details
-        "RUBY_VERSION: #{RUBY_VERSION}, rspec version: #{@hsh[:body_hash]["version"]}, server: #{`whoami`.chomp}@#{`hostname`.chomp}"
+        "RUBY_VERSION: #{RUBY_VERSION}, rspec version: #{@body["version"]}, server: #{`whoami`.chomp}@#{`hostname`.chomp}"
       end
 
       def summary
@@ -41,7 +41,7 @@ module CiBundle
       end
 
       def rspec_hash
-        @hsh[:body_hash]
+        @body
       end
 
       def files
@@ -69,6 +69,10 @@ module CiBundle
       end
       
       def filter_backtrace(exp)
+
+        # This can happen, RSpec will return an empty backtrace if the level is to low.
+        return ['NO-BACKTRACE'] if exp["backtrace"].nil?
+
         exp["backtrace"].reject do |str|
           str.match(/\/gems\//) || str.match(/\/\.gem\//) if IGNORE_GEM_DIR
         end[0...LIMIT_BT]
