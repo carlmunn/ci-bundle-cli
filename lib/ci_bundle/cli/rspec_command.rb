@@ -60,13 +60,7 @@ module CiBundle::Cli
     end
 
     def failure_email_hash(body_hash)
-
-      _from_email = @opts[:email].first
-      _to_email   = @opts[:email]
-      
       {
-        to:        _to_email,
-        from:      "#{_from_email} <Tests>",
         subject:   email_subject("🔥 Test Results: #{body_hash['summary_line']}"),
         body_hash: body_hash
       }
@@ -74,8 +68,6 @@ module CiBundle::Cli
 
     def success_email_hash
       {
-        to:        @opts[:email],
-        from:      "#{@opts[:email].first} <Tests>",
         subject:   email_subject("✔ All tests passed")
       }
     end

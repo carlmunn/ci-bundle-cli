@@ -98,8 +98,8 @@ module CiBundle
         _log("MAIL to: #{@emails.inspect}")
 
         mail = Mail.new do
-          from         _emails.first
-          to           _details[:to] || _emails
+          from         "Tests <#{_emails.first}>"
+          to           _details[:to]   || _emails
           subject      _details[:subject]
           content_type 'text/html; charset=UTF-8'
           body         _body
