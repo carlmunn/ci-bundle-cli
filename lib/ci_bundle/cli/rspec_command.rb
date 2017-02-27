@@ -27,7 +27,7 @@ module CiBundle::Cli
         json_result = get_json(stdout_result)
 
         # Get the last line
-        write_to_file(json_result)
+        #write_to_file(json_result)
 
         # Convert JSON to a ruby hash
         hash_result = parse(json_result, input_type: :json)

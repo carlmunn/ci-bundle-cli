@@ -10,6 +10,7 @@ module CiBundle
 
       CMDS_LOOKUP = {
         'bundle-update': "bundle update",
+        'bundle': "bundle",
         'rails-migrate': "RAILS_ENV=test bundle exec rake db:migrate",
         'svn-update': "svn update",
         'git-update': "git pull"
