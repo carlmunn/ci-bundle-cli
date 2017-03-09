@@ -31,9 +31,15 @@ module CiBundle
 
         begin
           _log "CMD: #{cmd}"
-
+          
+          # DEBUG:
+          #_log "\e[32m---- RUNNING CMD ----\n #{cmd.split(';').join("\n")}\e[0m"
+          
           out_str, err_str, status = Open3.capture3(cmd)
-
+          
+          # DEBUG:
+          #_log "\e[32m---- FINISHED RUNNING CMD ----\e[0m"
+          
           _log "CMD status: #{status}"
 
           _log "CMD error: #{err_str}" if err_str && err_str.length > 1
@@ -50,14 +56,19 @@ module CiBundle
         CiBundle::Cli.log(msg)
       end
 
-      def pre_run_commands
+      def pre_run_commands(prefix: nil)
+        
+        prefix_cmd = ->(cmd){
+          [prefix, cmd].compact.join(";")
+        }
+        
         @opts[:run].map do |cmd|
           _cmd = CMDS_LOOKUP[cmd.to_sym]
-
-          _cmd = "#{_cmd} >#{NULL_DEV}" #@opts[:verbose]
+          
+          _cmd = prefix_cmd.call("#{_cmd} > #{NULL_DEV}") unless @opts[:log]
 
           if @opts[:log]
-            "#{_cmd} > #{log_file(cmd)}"
+            prefix_cmd.call("#{_cmd} > #{log_file(cmd)}")
           else
             _cmd
           end
@@ -105,6 +116,8 @@ module CiBundle
 
       def _process_exception(exp)
         warn("[W] '#{exp}'")
+        warn("[W] '#{exp.backtrace.join("\n")}'\n") if @opts[:verbose]
+        
         @notifier.notify_exception(exp)
       end
 

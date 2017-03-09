@@ -7,17 +7,28 @@ module CiBundle::Cli
       dep_file = "deprecations.log"
 
       cmds = [].tap do |ary|
-        ary.concat(["cd #{_path}"]) if _path
-        ary.concat([*pre_run_commands])
-        ary.concat(["bundle exec rspec #{files} --deprecation-out #{dep_file} --format j"])
+        # Because each command is going to be run separately we'll 
+        # need to make sure we are in the correct dir.
+        cd_path = _path ? "cd #{_path}" : nil
+        
+        ary.concat([*pre_run_commands(prefix: cd_path)])
+        
+        rspec_cmd = ["bundle exec rspec #{files} --deprecation-out #{dep_file} --format j"].tap do |ary|
+          ary.insert(0, "#{cd_path}") if cd_path
+        end.join(';')
+        
+        ary.concat([rspec_cmd])
       end
 
-      _log("PRE CMDS: #{cmds.join(", ")}")
+      _log("ALL CMDS: #{cmds.join(", ")}")
 
-      # Get the last line, JSON is place on one night
-      # and we can avoid all the other stdout.
-      stdout_result = run_command(cmds.join(';'))
-
+      results = cmds.map do |cmd|
+        run_command(cmd)
+      end
+      
+      # Want the last as it's the rspec JSON results
+      stdout_result = results.last
+      
       begin  
 
         _log("RESULT: #{stdout_result.inspect}")
