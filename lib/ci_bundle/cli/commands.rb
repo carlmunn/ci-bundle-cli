@@ -7,11 +7,11 @@ module CiBundle
 
       # FreeBSD
       NULL_DEV = "/dev/null"
-
+      
       CMDS_LOOKUP = {
         'bundle-update': "bundle update",
         'bundle': "bundle",
-        'rails-migrate': "RAILS_ENV=test bundle exec rake db:migrate",
+        'rails-migrate': "bundle exec rake db:migrate RAILS_ENV=test",
         'svn-update': "svn update",
         'git-update': "git pull"
       }
@@ -30,20 +30,24 @@ module CiBundle
         _log "RUBY: #{`ruby -v`.chomp}"
 
         begin
-          _log "CMD: #{cmd}"
+           _log "\e[32m#{cmd}\e[0m"
           
           # DEBUG:
           #_log "\e[32m---- RUNNING CMD ----\n #{cmd.split(';').join("\n")}\e[0m"
+          out_str, err_str, status = [nil, nil, nil]
           
-          out_str, err_str, status = Open3.capture3(cmd)
+          Bundler.with_clean_env do
+            out_str, err_str, status = Open3.capture3(cmd)
+          end
           
           # DEBUG:
           #_log "\e[32m---- FINISHED RUNNING CMD ----\e[0m"
           
           _log "CMD status: #{status}"
 
-          _log "CMD error: #{err_str}" if err_str && err_str.length > 1
-
+          _err "\e[31m#{err_str}\e[0m" if err_str && err_str.length > 1
+          
+          _log "OUTPUT: #{_truncate(out_str)}"
           #raise(CiFailureExp, "Errors from Open3: #{err_str}") if status != 0 && _present?(err_str)
 
           out_str
@@ -52,10 +56,18 @@ module CiBundle
         end
       end
 
+      def _truncate(str, size: 21500)
+        str.length > size ? "#{str[-size..-1]}... (#{str.length})" : str
+      end
+
       def _log(msg)
         CiBundle::Cli.log(msg)
       end
-
+      
+      def _err(msg)
+        CiBundle::Cli.err(msg)
+      end
+      
       def pre_run_commands(prefix: nil)
         
         prefix_cmd = ->(cmd){
@@ -65,10 +77,10 @@ module CiBundle
         @opts[:run].map do |cmd|
           _cmd = CMDS_LOOKUP[cmd.to_sym]
           
-          _cmd = prefix_cmd.call("#{_cmd} > #{NULL_DEV}") unless @opts[:log]
+          _cmd = prefix_cmd.call("#{_cmd} > #{NULL_DEV}") if (@opts[:silence] || !@opts[:log])
 
           if @opts[:log]
-            prefix_cmd.call("#{_cmd} > #{log_file(cmd)}")
+            prefix_cmd.call("#{_cmd} | tee #{log_file(cmd)}")
           else
             _cmd
           end

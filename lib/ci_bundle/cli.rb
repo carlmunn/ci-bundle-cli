@@ -36,5 +36,9 @@ module CiBundle
     def self.log(msg)
       puts "[D] #{msg}" if (@opts && @opts[:verbose])
     end
+    
+    def self.err(msg)
+      puts "[E] #{msg}" if (@opts && !@opts[:silence])
+    end
   end
 end

@@ -32,7 +32,8 @@ opts = Slop.parse do |o|
   
   o.bool '--log', 'Enable logging'
   o.bool '--verbose', 'Verbose'
-
+  o.bool '--silence', 'Suppress output'
+  
   o.on '--version', 'print the version' do
     puts Slop::VERSION
     exit

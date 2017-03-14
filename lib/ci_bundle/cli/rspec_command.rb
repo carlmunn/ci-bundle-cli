@@ -1,7 +1,7 @@
 module CiBundle::Cli
   class RspecCommand < BaseCommand
     def run
-
+      
       files = @opts[:file].join(' ')
 
       dep_file = "deprecations.log"
