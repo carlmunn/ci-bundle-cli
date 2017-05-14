@@ -1,5 +1,3 @@
-require 'byebug'
-
 module CiBundle
   module Cli
 

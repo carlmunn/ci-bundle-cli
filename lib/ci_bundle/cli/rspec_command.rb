@@ -51,6 +51,8 @@ module CiBundle::Cli
         raise exp
       end
 
+      csv_result(hash_result) if write_to_csv?
+
       hash_result
     end
 
@@ -100,7 +102,45 @@ module CiBundle::Cli
 
     def write_to_file(result, postfix: 'results')
       timestamp = Time.now.strftime("%Y%m%d_%H-%M-%S")
-      File.open("test-report-#{timestamp}.#{postfix}", 'w') {|file| file.write(result) }
+      self.class.append_to_file("test-report-#{timestamp}.#{postfix}", result)
+    end
+
+    def write_to_csv?
+      !!@opts[:csv]
+    end
+    
+    def csv_exists?
+      File.exist?(abs_csv_file)
+    end
+
+    def csv_result(hash_result)
+      if csv_exists?
+        _log "Writing CSV: #{abs_csv_file}"
+      else
+        _log "Creating CSV: #{abs_csv_file}"
+      end
+
+      _sum = hash_result['summary']
+
+      # Time, Duration, example_count, failure_count, pending_count
+      csv_str = [
+        Time.now,
+        _sum['duration'],
+        _sum['example_count'],
+        _sum['failure_count'],
+        _sum['pending_count']
+      ].join(',')
+
+      self.class.append_to_file(abs_csv_file, csv_str)
+    end
+
+    def abs_csv_file
+      File.absolute_path(@opts[:csv])
+    end
+
+    # Shifted this out so I can stub it for testing
+    def self.append_to_file(name, str)
+      File.open(name, 'a') { |file| file.write("#{str}\n") }
     end
   end
 end

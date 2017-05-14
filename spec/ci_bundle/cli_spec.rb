@@ -96,6 +96,19 @@ describe CiBundle::Cli do
       check_email(to_count: 2, subject: 'Test Results: 3 examples, 2 failures')
     end
 
+    it 'generates CSV file' do
+      expect(CiBundle::Cli::RspecCommand).to receive(:append_to_file)
+
+      options = _opts.merge!({
+        path:  _test_dir,
+        file:  [rspec_file('mix')],
+        email: ['me@test.com'],
+        csv:   '/home/carl/tmp/csv-file.csv'
+      })
+
+      CiBundle::Cli.run('rspec', options)
+    end
+
     it 'test synxtax error spec' do
       
       skip "Currently isn't away to avoid problems within tests itself"
