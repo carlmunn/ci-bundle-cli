@@ -1,7 +1,7 @@
 require "spec_helper"
+require 'byebug'
 
 describe CiBundle::Cli do
-
   let(:debug) { false }
 
   let(:_opts) {{
@@ -10,12 +10,32 @@ describe CiBundle::Cli do
     verbose: debug
   }}
 
-  let(:rspec_json) {{
-    description: "Description about this test",
-    passed:      "success",
-    examples:    [],
-    file_path:   "/path-to/file.rb"
-  }}
+  def json_example(attrs = {})
+    {
+      id:              './path/to_file_spec.rb[1:1:1:3:1:1]',
+      description:     'Description about this test',
+      status:          'passed',
+      file_path:       './path/to_file_spec.rb',
+      run_time:        0.100,
+      pending_message: nil
+    }.merge(attrs)
+  end
+
+  def json_result(examples = [])
+    {
+      'examples': examples,
+      'seed': 1234,
+      'summary': {
+        "duration": 1,
+        "example_count": 5,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      'summary_line': '1 examples, 0 failures',
+      'version': '3.9.2'
+    }
+  end
 
   before :each do
     Mail::TestMailer.deliveries.clear
@@ -29,22 +49,27 @@ describe CiBundle::Cli do
   end
 
   context 'disabled commands' do
-    
-    before do
-      allow(Open3).to receive(:capture3).and_return(rspec_json.to_json)
-    end
-
     it "has a version number" do
       expect(CiBundle::Cli::VERSION).not_to be nil
     end
 
-    it "tests basic rspec command" do
+    it "tests basic RSpec command with successful examples" do
+      allow(Open3).to receive(:capture3).and_return(json_result([json_example]).to_json)
       options = _opts.merge!({path: './path/to/rspec', email: ['me@test.com']})
       CiBundle::Cli.run('rspec', options)
       check_email
     end
 
-    it "tests two emails with basic rspec command" do
+    it "tests basic RSpec command with failed example" do
+      result = json_result([json_example(status: 'failed')])
+      allow(Open3).to receive(:capture3).and_return(json_result([json_example]).to_json)
+      options = _opts.merge!({path: './path/to/rspec', email: ['me@test.com']})
+      CiBundle::Cli.run('rspec', options)
+      check_email
+    end
+
+    it "tests two emails with basic RSpec command" do
+      allow(Open3).to receive(:capture3).and_return(json_result([json_example]).to_json)
       options = _opts.merge!({path: './path/to/rspec', email: ['me@test.com', 'second@email.com']})
       CiBundle::Cli.run('rspec', options)
       check_email(to_count: 2)
@@ -52,7 +77,6 @@ describe CiBundle::Cli do
   end
 
   context 'rspec files' do
-
     let(:_test_dir) {File.join(File.dirname(__FILE__), '../..')}
 
     def rspec_file(name)
@@ -60,7 +84,6 @@ describe CiBundle::Cli do
     end
 
     it 'tests success rspec by using these tests (recursive)' do
-
       options = _opts.merge!({
         path:  _test_dir,
         file:  [rspec_file('success')],
@@ -110,7 +133,7 @@ describe CiBundle::Cli do
     end
 
     it 'test synxtax error spec' do
-      
+
       skip "Currently isn't away to avoid problems within tests itself"
 
       options = _opts.merge!({

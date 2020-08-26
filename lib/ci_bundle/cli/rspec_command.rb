@@ -45,7 +45,7 @@ module CiBundle::Cli
         # Convert JSON to a ruby hash
         hash_result = parse(json_result, input_type: :json)
 
-        check_for_failure(hash_result)
+        send_out_emails(hash_result)
 
       rescue => exp
         # Write JSON to FS for analyse
@@ -59,11 +59,14 @@ module CiBundle::Cli
     end
 
     private
-    def check_for_failure(result)
+    def send_out_emails(result)
+      puts "RESULT: #{result}"
       if has_failure?(result)
         notify(failure_email_hash(result), by: :email)
-      else
+      elsif was_successful?(result)
         notify(success_email_hash, by: :email)
+      else
+        notify(error_email_hash(result), by: :email)
       end
     end
 
@@ -100,10 +103,15 @@ module CiBundle::Cli
       }
     end
 
-    def success_email_hash
+    def error_email_hash
       {
-        subject:   email_subject("✔ All tests passed")
+        subject: email_subject("🔥 ERROR: malformed, broken code, etc"),
+        body_hash: body_hash
       }
+    end
+
+    def success_email_hash
+      {subject: email_subject("✔ All tests passed")}
     end
 
     def email_subject(subject)
@@ -111,6 +119,10 @@ module CiBundle::Cli
         ary << "[#{@opts[:namespace]}]" if @opts[:namespace]
         ary <<subject
       end.join(" ")
+    end
+
+    def was_successful?(result)
+      result['summary']['failure_count'] == 0
     end
 
     def has_failure?(result)

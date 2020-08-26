@@ -10,3 +10,4 @@
 *.gem
 *.results
 *.log
+.byebug_history

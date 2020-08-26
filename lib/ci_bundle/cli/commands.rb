@@ -2,12 +2,11 @@ module CiBundle
   module Cli
     # Supply basic commands that will be used all
     class BaseCommand
-      
       class CiFailureExp < StandardError; end
 
       # FreeBSD
       NULL_DEV = "/dev/null"
-      
+
       CMDS_LOOKUP = {
         'bundle-update': "bundle update",
         'bundle': "RAILS_ENV=test bundle",
@@ -27,33 +26,42 @@ module CiBundle
 
       private
       def run_command(cmd)
-        
         _log "RUBY: #{`ruby -v`.chomp}"
 
         begin
-           _log "\e[32m#{cmd}\e[0m"
-          
+          _log "\e[32mCMD: #{cmd}\e[0m"
+
           # DEBUG:
           #_log "\e[32m---- RUNNING CMD ----\n #{cmd.split(';').join("\n")}\e[0m"
           out_str, err_str, status = [nil, nil, nil]
-          
-          Bundler.with_clean_env do
+
+          Bundler.send(bundler_clean_env_method) do
             out_str, err_str, status = Open3.capture3(cmd)
           end
-          
+
           # DEBUG:
           #_log "\e[32m---- FINISHED RUNNING CMD ----\e[0m"
-          
-          _log "CMD status: #{status}"
+
+          #_log "CMD: => #{status}"
 
           _err "\e[31m#{err_str}\e[0m" if err_str && err_str.length > 1
-          
-          _log "OUTPUT: #{_truncate(out_str)}"
+
+          _log "CMD: => #{_truncate(out_str)}"
           #raise(CiFailureExp, "Errors from Open3: #{err_str}") if status != 0 && _present?(err_str)
 
           out_str
         rescue => err
           _process_exception(err); ""
+        end
+      end
+
+      # Make both versions happy
+      # Other wise: [DEPRECATED] `Bundler.with_clean_env`
+      def bundler_clean_env_method
+        if Bundler.respond_to?(:with_unbundled_env)
+          :with_unbundled_env
+        else
+          :with_clean_env
         end
       end
 
@@ -64,20 +72,20 @@ module CiBundle
       def _log(msg)
         CiBundle::Cli.log(msg)
       end
-      
+
       def _err(msg)
         CiBundle::Cli.err(msg)
       end
-      
+
       def pre_run_commands(prefix: nil)
-        
+
         prefix_cmd = ->(cmd){
           [prefix, cmd].compact.join(";")
         }
-        
+
         @opts[:run].map do |cmd|
           _cmd = CMDS_LOOKUP[cmd.to_sym]
-          
+
           _cmd = prefix_cmd.call("#{_cmd} > #{NULL_DEV}") if (@opts[:silence] || !@opts[:log])
 
           if @opts[:log]
@@ -98,7 +106,7 @@ module CiBundle
           ary << date
           ary << cmd_name.gsub(/\s/, '_').downcase
         end.join("_")
-        
+
         "#{file_name}.log"
       end
 
@@ -130,7 +138,7 @@ module CiBundle
       def _process_exception(exp)
         warn("[W] '#{exp}'")
         warn("[W] '#{exp.backtrace.join("\n")}'\n") if @opts[:verbose]
-        
+
         @notifier.notify_exception(exp)
       end
 
