@@ -1,22 +1,24 @@
 module CiBundle::Cli
   class RspecCommand < BaseCommand
     def run
-      
-      files = @opts[:file].join(' ')
-
-      dep_file = "deprecations.log"
 
       cmds = [].tap do |ary|
-        # Because each command is going to be run separately we'll 
+        # Because each command is going to be run separately we'll
         # need to make sure we are in the correct dir.
         cd_path = _path ? "cd #{_path}" : nil
-        
+
         ary.concat([*pre_run_commands(prefix: cd_path)])
-        
-        rspec_cmd = ["bundle exec rspec #{files} --deprecation-out #{dep_file} --format j"].tap do |ary|
+
+        # "--bisect" can help with debugging but I'm not convinced this is a good idea
+        # with the amount of tests we have. it would take way to long
+
+        # Some of the options will be blank, reason for the blank rejections
+        _opts = clear_blank([files, deprecation_log, output_format])
+
+        rspec_cmd = ["bundle exec rspec #{_opts}"].tap do |ary|
           ary.insert(0, "#{cd_path}") if cd_path
         end.join(';')
-        
+
         ary.concat([rspec_cmd])
       end
 
@@ -25,11 +27,11 @@ module CiBundle::Cli
       results = cmds.map do |cmd|
         run_command(cmd)
       end
-      
+
       # Want the last as it's the rspec JSON results
       stdout_result = results.last
-      
-      begin  
+
+      begin
 
         _log("RESULT: #{stdout_result.inspect}")
 
@@ -62,6 +64,25 @@ module CiBundle::Cli
         notify(failure_email_hash(result), by: :email)
       else
         notify(success_email_hash, by: :email)
+      end
+    end
+
+    def output_format
+      "--format j"
+    end
+
+    def files
+      @opts[:file].join(' ')
+    end
+
+    def deprecation_log
+
+      dep_file = "deprecations.log"
+
+      if @opts[:depreations]
+        "--deprecation-out #{dep_file}"
+      else
+        nil
       end
     end
 
@@ -108,7 +129,7 @@ module CiBundle::Cli
     def write_to_csv?
       !!@opts[:csv]
     end
-    
+
     def csv_exists?
       File.exist?(abs_csv_file)
     end
@@ -136,6 +157,10 @@ module CiBundle::Cli
 
     def abs_csv_file
       File.absolute_path(@opts[:csv])
+    end
+
+    def clear_blank(ary)
+      ary.reject {|str| str == nil || str == '' }.join(' ')
     end
 
     # Shifted this out so I can stub it for testing

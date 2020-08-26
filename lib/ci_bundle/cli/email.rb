@@ -65,7 +65,7 @@ module CiBundle
       def _failures
         examples.select { |example| example["status"] == "failed" }.group_by {|ex| ex["file_path"] }
       end
-      
+
       def filter_backtrace(exp)
 
         # This can happen, RSpec will return an empty backtrace if the level is to low.
@@ -104,6 +104,7 @@ module CiBundle
         end
 
         mail.deliver!
+        File.open('/home/carl/log/test-email.eml', 'w') {|f| f.write(_body) }
 
         _log("MAIL deliver!: #{mail.inspect}")
       end

@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
-
 Encoding.default_external = Encoding::UTF_8
 
 require "rubygems"
 require "bundler"
+
+#puts "RUBY VERSION: #{RUBY_VERSION} Bundler Version: #{Bundler::VERSION}"
 
 # Add load path for require to find the code
 cur_dir     = File.dirname(File.absolute_path(__FILE__))
@@ -19,19 +20,21 @@ require 'slop'
 
 opts = Slop.parse do |o|
 
-  cmd_runable = %w(bundle-update rails-migrate svn-udpate git-update)
+  cmd_runable = %w(bundle-update yarn rails-migrate svn-update git-update)
 
-  o.array '-f','--file', 'Script to run'
+  # For testing purposes checkout the pattern rspec uses and get the list and apply the tests individually
+  o.array '-f','--file', 'Spec file to run, can use multi --file'
   o.string '--parser', 'Parser to use'
   o.string '--path', 'Working directory (rspec)'
   o.string '--config', 'Points to the YAML settings file (TODO)'
   o.string '-N', '--namespace', "Namespace to help distinguish the different tests"
   o.string '--csv', "Report to CSV file for reporting and tracking"
+  o.string '--depreations', "Log deprecations to a file"
   
   o.array '--email', 'Email to send the failed results to (first gets the exceptions)'
   o.array '--run', "Run canned commands in the order given (#{cmd_runable.join(', ')})"
   
-  o.bool '--log', 'Enable logging'
+  o.bool '--log', 'Enable logging (logs pre commands to Rails root)'
   o.bool '--verbose', 'Verbose'
   o.bool '--silence', 'Suppress output'
   

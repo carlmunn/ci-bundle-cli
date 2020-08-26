@@ -10,10 +10,11 @@ module CiBundle
       
       CMDS_LOOKUP = {
         'bundle-update': "bundle update",
-        'bundle': "bundle",
+        'bundle': "RAILS_ENV=test bundle",
         'rails-migrate': "bundle exec rake db:migrate RAILS_ENV=test",
         'svn-update': "svn update",
-        'git-update': "git pull"
+        'git-update': "git pull",
+        'yarn': "yarn"
       }
 
       def initialize(opts={})
