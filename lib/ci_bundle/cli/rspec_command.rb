@@ -60,7 +60,6 @@ module CiBundle::Cli
 
     private
     def send_out_emails(result)
-      puts "RESULT: #{result}"
       if has_failure?(result)
         notify(failure_email_hash(result), by: :email)
       elsif was_successful?(result)

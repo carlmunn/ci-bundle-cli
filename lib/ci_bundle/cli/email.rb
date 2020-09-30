@@ -23,7 +23,7 @@ module CiBundle
       end
 
       def details
-        "RUBY_VERSION: #{RUBY_VERSION}, rspec version: #{@body["version"]}, server: #{`whoami`.chomp}@#{`hostname`.chomp}"
+        "RUBY_VERSION: #{RUBY_VERSION}, rspec version: #{@body["version"]}, seed: #{@body["seed"]},server: #{`whoami`.chomp}@#{`hostname`.chomp}"
       end
 
       def summary
