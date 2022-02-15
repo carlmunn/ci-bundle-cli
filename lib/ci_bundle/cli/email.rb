@@ -23,7 +23,12 @@ module CiBundle
       end
 
       def details
-        "RUBY_VERSION: #{RUBY_VERSION}, rspec version: #{@body["version"]}, seed: #{@body["seed"]},server: #{`whoami`.chomp}@#{`hostname`.chomp}"
+        [
+          "RUBY_VERSION: #{RUBY_VERSION}",
+          "COUNTRY: #{ENV['COUNTRY']}",
+          "rspec version: #{@body["version"]}",
+          "seed: #{@body["seed"]} #{`whoami`.chomp}@#{`hostname`.chomp}"
+        ].join(', ')
       end
 
       def summary

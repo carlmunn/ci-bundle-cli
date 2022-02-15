@@ -1,13 +1,13 @@
 module CiBundle
   module Cli
     class Notifier
-
       # Currently only email or stdout
       def initialize(opts={})
         @opts = opts
       end
 
-      def notify_success(body_hash, by: nil)
+      # Could be failure or success
+      def process(body_hash, by: nil)
         case by
         when :email
           _email(body_hash)

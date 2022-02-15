@@ -39,6 +39,13 @@ module CiBundle::Cli
 
         json_result = get_json(stdout_result)
 
+        # Working out the order of tests using it's JSON results. Command to check:
+        # cat json_result_EXTRA.json | jq -c '.examples[] | {id: .id, line: .line_number}'
+        if @opts[:namespace]&.match(/master/i)
+          extra = [@opts[:namespace].downcase, Time.now.strftime("%Y-%m-%d_%H%M%S")].join('_')
+          File.open("/home/carl/log/json_result_#{extra}.json", 'w') { |f| f.write(json_result) }
+        end
+
         # Get the last line
         #write_to_file(json_result)
 
@@ -63,7 +70,7 @@ module CiBundle::Cli
       if has_failure?(result)
         notify(failure_email_hash(result), by: :email)
       elsif was_successful?(result)
-        notify(success_email_hash, by: :email)
+        notify(success_email_hash(result), by: :email)
       else
         notify(error_email_hash(result), by: :email)
       end
@@ -109,14 +116,17 @@ module CiBundle::Cli
       }
     end
 
-    def success_email_hash
-      {subject: email_subject("✔ All tests passed")}
+    def success_email_hash(body_hash)
+      {
+        subject: email_subject("✔ All tests passed: #{body_hash['summary_line']}"),
+        body_hash: body_hash
+      }
     end
 
     def email_subject(subject)
       [].tap do |ary|
         ary << "[#{@opts[:namespace]}]" if @opts[:namespace]
-        ary <<subject
+        ary << subject
       end.join(" ")
     end
 

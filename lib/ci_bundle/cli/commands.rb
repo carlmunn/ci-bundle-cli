@@ -10,10 +10,13 @@ module CiBundle
       CMDS_LOOKUP = {
         'bundle-update': "bundle update",
         'bundle': "RAILS_ENV=test bundle",
+        'rails-clear-tmp': "bundle exec rake tmp:clear",
         'rails-migrate': "bundle exec rake db:migrate RAILS_ENV=test",
         'svn-update': "svn update",
-        'git-update': "git pull",
-        'yarn': "yarn"
+        # Fulls a checkout to clear any changes that might have happened
+        'git-update': "git checkout --force && git pull",
+        # Point directly to my own yarn. The local is known to break
+        'yarn': "/home/carl/.npm-packages/bin/yarn"
       }
 
       def initialize(opts={})
@@ -116,7 +119,7 @@ module CiBundle
       end
 
       def notify(result, by: nil)
-        @notifier.notify_success(result, by: by)
+        @notifier.process(result, by: by)
       end
 
       def _basename
